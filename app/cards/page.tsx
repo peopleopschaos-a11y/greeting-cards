@@ -34,7 +34,6 @@ export default async function CardsPage() {
                   fill
                   sizes="(max-width: 720px) 100vw, 720px"
                   style={{ objectFit: 'cover', borderRadius: 6 }}
-                  priority={false}
                 />
               </div>
             ) : null}
