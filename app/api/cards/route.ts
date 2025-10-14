@@ -1,7 +1,9 @@
-import { supabaseAdmin } from '../../../lib/supabaseAdmin';
+import { getSupabaseAdmin } from '../../../lib/supabaseAdmin';
 
 /** GET /api/cards – list recent public cards */
 export async function GET() {
+  const supabaseAdmin = getSupabaseAdmin();
+
   const { data, error } = await supabaseAdmin
     .from('cards')
     .select('id, title, message, image_url, created_at')
@@ -22,8 +24,11 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401 });
   }
 
+  const supabaseAdmin = getSupabaseAdmin();
+
   try {
-    const { title, message, image_url, is_public = true } = await req.json();
+    const body = await req.json();
+    const { title, message, image_url, is_public = true } = body ?? {};
 
     if (!title || !message) {
       return new Response(JSON.stringify({ ok: false, error: 'title and message are required' }), { status: 400 });
@@ -39,7 +44,8 @@ export async function POST(req: Request) {
       return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500 });
     }
     return new Response(JSON.stringify({ ok: true, data }), { status: 201 });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ ok: false, error: e?.message ?? 'unknown error' }), { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'unknown error';
+    return new Response(JSON.stringify({ ok: false, error: message }), { status: 500 });
   }
 }
